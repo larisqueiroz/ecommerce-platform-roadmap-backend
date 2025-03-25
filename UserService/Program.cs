@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using UserService.Data;
+using UserService.Repositories.Implementations;
+using UserService.Repositories.Interfaces;
+using UserService.Services.Implementations;
+using UserService.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +17,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<UserServiceContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("USERSERVICE")));
 
 builder.Services.AddAutoMapper(typeof(MappingProfiles));
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService_>();
 
 var app = builder.Build();
 
