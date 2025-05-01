@@ -7,12 +7,13 @@ using UserService.Services.Interfaces;
 
 namespace UserService.Services.Implementations
 {
-    public class UserService_: IUserService
+    public class UserService_: IUserService_
     {
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
 
-        public UserService_(IMapper mapper, IUserRepository userRepository) {
+        public UserService_(IMapper mapper, IUserRepository userRepository)
+        {
             _mapper = mapper;
             _userRepository = userRepository;
         }
@@ -55,12 +56,12 @@ namespace UserService.Services.Implementations
                 Type = userDto.Type
             };
 
-            // TODO hash password
+            var hasherPassword = new PasswordHasher<User>().HashPassword(user, userDto.Password);
 
             return _mapper.Map<UserDto>(_userRepository.Create(user));
         }
 
-        public User Update(UserDto userDto)
+        public UserDto Update(UserDto userDto)
         {
             if (userDto.Email == null)
             {
@@ -80,7 +81,7 @@ namespace UserService.Services.Implementations
                 Type = userDto.Type
             };
 
-            return _userRepository.Update(user);
+            return _mapper.Map<UserDto>(_userRepository.Update(user));
         }
 
         public void Delete(Guid id)

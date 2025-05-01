@@ -1,1 +1,26 @@
-﻿
+﻿services:
+    web: 
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: "dotnet ef database update"
+        ports: 
+            - 3500:8080
+        restart: on-failure
+        depends_on:
+            - postgres
+        networks:
+            - userservicenetwork
+
+    postgres:
+        image: postgres
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: admin
+            POSTGRES_DB: postgres
+        networks:
+            - userservicenetwork
+ 
+networks:
+    userservicenetwork:
+        driver: bridge
