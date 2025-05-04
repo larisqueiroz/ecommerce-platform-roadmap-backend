@@ -82,11 +82,6 @@ namespace UserService.Controllers
                 _logger.LogError(ex, "Error creating user");
                 return BadRequest(ex.Message);
             }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError(ex, "Error creating user");
-                return BadRequest(ex.Message);
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating user");
@@ -144,25 +139,20 @@ namespace UserService.Controllers
             }
         }
 
-        [HttpPost("register")]
-        public IActionResult Register([FromBody] UserDto userDto)
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] UserLoginDto userDto)
         {
             try
             {
-                var user = _userService.Create(userDto);
+                var user = _userService.Login(userDto);
                 return Ok(user);
             }
             catch (ArgumentNullException ex)
             {
-                _logger.LogError(ex, "Error registering user");
+                _logger.LogError(ex, "Error with empty values");
                 return BadRequest(ex.Message);
             }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError(ex, "Error registering user");
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
+            catch (BadHttpRequestException ex)
             {
                 _logger.LogError(ex, "Error registering user");
                 return new BadRequestResult();

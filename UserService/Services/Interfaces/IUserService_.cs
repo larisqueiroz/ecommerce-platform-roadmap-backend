@@ -10,6 +10,7 @@ namespace UserService.Services.Interfaces
         public UserDto Create(UserDto userDto);
         public UserDto Update(UserDto userDto);
         public void Delete(Guid id);
+        public UserDto Login(UserLoginDto userDto);
 
     }
 }

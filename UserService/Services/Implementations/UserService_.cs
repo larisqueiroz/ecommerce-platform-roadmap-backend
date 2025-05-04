@@ -46,7 +46,7 @@ namespace UserService.Services.Implementations
 
             if (_userRepository.GetByEmail(userDto.Email) != null)
             {
-                throw new ArgumentException("User with this email already exists");
+                throw new Exception("User with this email already exists");
             }
 
             var user = new User
@@ -57,6 +57,8 @@ namespace UserService.Services.Implementations
             };
 
             var hasherPassword = new PasswordHasher<User>().HashPassword(user, userDto.Password);
+
+            user.Hash = hasherPassword;
 
             return _mapper.Map<UserDto>(_userRepository.Create(user));
         }
@@ -87,6 +89,31 @@ namespace UserService.Services.Implementations
         public void Delete(Guid id)
         {
             _userRepository.Delete(id);
+        }
+
+        public UserDto Login(UserLoginDto userDto)
+        {
+            if (userDto == null)
+            {
+                throw new ArgumentNullException("user cannot be null");
+            }
+
+            if (userDto.Email == null || userDto.Password == null)
+            {
+                throw new ArgumentNullException("Email and password cannot be null");
+            }
+
+            var user = _userRepository.GetByEmail(userDto.Email);
+            if (user == null)
+            {
+                throw new BadHttpRequestException("Email or password is wrong");
+            }
+
+            if (new PasswordHasher<User>().VerifyHashedPassword(user, user.Hash, userDto.Password) == PasswordVerificationResult.Failed) {
+                throw new BadHttpRequestException("Wrong email or password");
+            }
+
+            return _mapper.Map<UserDto>(user);
         }
     }
 }
