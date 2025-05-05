@@ -1,8 +1,12 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Security.Policy;
+using System.Text;
 using UserService.Data;
 using UserService.Models.DAO;
 using UserService.Models.DTO;
@@ -22,6 +26,45 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<UserServiceContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("USERSERVICE")));
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Authentication:Issuer"],
+            ValidAudience = builder.Configuration["Authentication:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Authentication:Token"]!))
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Administrator", new AuthorizationPolicyBuilder()
+        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+        .RequireRole("ADMIN")
+        .RequireAuthenticatedUser().Build());
+
+    options.AddPolicy("Users", new AuthorizationPolicyBuilder()
+        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+        .RequireRole("ADMIN","USER","OPERATOR")
+        .RequireAuthenticatedUser().Build());
+
+    options.AddPolicy("Operators", new AuthorizationPolicyBuilder()
+        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+        .RequireRole("OPERATOR", "ADMIN")
+        .RequireAuthenticatedUser().Build());
+
+    var authorizationPolicyBuilder = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme);
+
+    authorizationPolicyBuilder = authorizationPolicyBuilder.RequireAuthenticatedUser();
+
+    options.DefaultPolicy = authorizationPolicyBuilder.Build();
+});
+
 builder.Services.AddAutoMapper(typeof(MappingProfiles));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -38,7 +81,7 @@ using (var scope = app.Services.CreateScope())
         context.Database.Migrate();
     }
 
-    if (context.Users.FirstOrDefault(u => u.Type == UserService.Enum.UserType.ADMIN) == null)
+    if (!context.Users.Any())
     {
         var userAdmin = new User()
         {
@@ -63,9 +106,10 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseHttpsRedirection();
 
 app.MapControllers();
 

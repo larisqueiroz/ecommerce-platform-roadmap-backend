@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using UserService.Models.DTO;
 using UserService.Services.Interfaces;
 
 namespace UserService.Controllers
 {
     [ApiController]
+    [Authorize("Users")]
     [Route("api/users")]
     public class UserController : ControllerBase
     {
@@ -16,6 +18,7 @@ namespace UserService.Controllers
             _userService = userService;
         }
 
+        [Authorize("Administrator")]
         [HttpGet]
         public async Task<ActionResult<List<UserDto>>> GetAll()
         {
@@ -69,6 +72,7 @@ namespace UserService.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult<UserDto>> Create([FromBody] UserDto userDto)
         {
@@ -139,6 +143,7 @@ namespace UserService.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login([FromBody] UserLoginDto userDto)
         {
