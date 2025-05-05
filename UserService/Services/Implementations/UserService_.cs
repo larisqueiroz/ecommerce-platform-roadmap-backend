@@ -1,5 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using UserService.Models.DAO;
 using UserService.Models.DTO;
 using UserService.Repositories.Interfaces;
@@ -10,30 +14,32 @@ namespace UserService.Services.Implementations
     public class UserService_: IUserService_
     {
         private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
         private readonly IUserRepository _userRepository;
 
-        public UserService_(IMapper mapper, IUserRepository userRepository)
+        public UserService_(IMapper mapper, IUserRepository userRepository, IConfiguration configuration)
         {
             _mapper = mapper;
             _userRepository = userRepository;
+            _configuration = configuration;
         }
 
-        public List<UserDto> GetAll()
+        public async Task<List<UserDto>> GetAll()
         {
-            return _mapper.Map<List<UserDto>>(_userRepository.GetAll());
+            return _mapper.Map<List<UserDto>>(await _userRepository.GetAll());
         }
 
-        public UserDto GetById(Guid id)
+        public async Task<UserDto> GetById(Guid id)
         {
-            return _mapper.Map<UserDto>(_userRepository.GetById(id));
+            return _mapper.Map<UserDto>(await _userRepository.GetById(id));
         }
 
-        public UserDto GetByEmail(string email)
+        public async Task<UserDto> GetByEmail(string email)
         {
-            return _mapper.Map<UserDto>(_userRepository.GetByEmail(email));
+            return _mapper.Map<UserDto>(await _userRepository.GetByEmail(email));
         }
 
-        public UserDto Create(UserDto userDto)
+        public async Task<UserDto> Create(UserDto userDto)
         {
             if (userDto == null) {
                 throw new ArgumentNullException("user cannot be null");
@@ -44,7 +50,7 @@ namespace UserService.Services.Implementations
                 throw new ArgumentNullException("Email and password cannot be null");
             }
 
-            if (_userRepository.GetByEmail(userDto.Email) != null)
+            if (await _userRepository.GetByEmail(userDto.Email) != null)
             {
                 throw new Exception("User with this email already exists");
             }
@@ -60,17 +66,17 @@ namespace UserService.Services.Implementations
 
             user.Hash = hasherPassword;
 
-            return _mapper.Map<UserDto>(_userRepository.Create(user));
+            return _mapper.Map<UserDto>(await _userRepository.Create(user));
         }
 
-        public UserDto Update(UserDto userDto)
+        public async Task<UserDto> Update(UserDto userDto)
         {
             if (userDto.Email == null)
             {
                 throw new ArgumentNullException("Email cannot be null");
             }
 
-            var saved = _userRepository.GetByEmail(userDto.Email);
+            var saved = await _userRepository.GetByEmail(userDto.Email);
             if (saved == null) {
                 throw new ArgumentException("User not found");
             }
@@ -83,15 +89,15 @@ namespace UserService.Services.Implementations
                 Type = userDto.Type
             };
 
-            return _mapper.Map<UserDto>(_userRepository.Update(user));
+            return _mapper.Map<UserDto>(await _userRepository.Update(user));
         }
 
-        public void Delete(Guid id)
+        public async Task Delete(Guid id)
         {
-            _userRepository.Delete(id);
+            await _userRepository.Delete(id);
         }
 
-        public UserDto Login(UserLoginDto userDto)
+        public async Task<string> Login(UserLoginDto userDto)
         {
             if (userDto == null)
             {
@@ -103,7 +109,7 @@ namespace UserService.Services.Implementations
                 throw new ArgumentNullException("Email and password cannot be null");
             }
 
-            var user = _userRepository.GetByEmail(userDto.Email);
+            var user = await _userRepository.GetByEmail(userDto.Email);
             if (user == null)
             {
                 throw new BadHttpRequestException("Email or password is wrong");
@@ -113,7 +119,27 @@ namespace UserService.Services.Implementations
                 throw new BadHttpRequestException("Wrong email or password");
             }
 
-            return _mapper.Map<UserDto>(user);
+            string token = await CreateToken(user);
+
+            return token;
         }
+
+        private async Task<string> CreateToken(User user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Email, user.Email),
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetValue<string>("Authentication:Token")!));
+
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
+
+            var tokenDescriptor = new JwtSecurityToken(issuer: _configuration.GetValue<string>("Authentication:Issuer"), 
+                audience: _configuration.GetValue<string>("Authentication:Audience"),
+                claims: claims, expires: DateTime.Now.AddHours(1), signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
+        }   
     }
 }

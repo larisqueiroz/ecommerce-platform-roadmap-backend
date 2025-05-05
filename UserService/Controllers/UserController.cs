@@ -17,11 +17,11 @@ namespace UserService.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<ActionResult<List<UserDto>>> GetAll()
         {
             try
             {
-                var users = _userService.GetAll();
+                var users = await _userService.GetAll();
                 return Ok(users);
             }
             catch (Exception ex)
@@ -32,11 +32,11 @@ namespace UserService.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById([FromQuery] Guid id)
+        public async Task<ActionResult<UserDto>> GetById([FromQuery] Guid id)
         {
             try
             {
-                var user = _userService.GetById(id);
+                var user = await _userService.GetById(id);
                 if (user == null)
                 {
                     return NotFound();
@@ -50,12 +50,12 @@ namespace UserService.Controllers
             }
         }
 
-        [HttpGet("{email}")]
-        public IActionResult GetById([FromQuery] string id)
+        [HttpGet("by-email/{email}")]
+        public async Task<ActionResult<UserDto>> GetByEmail([FromQuery] string email)
         {
             try
             {
-                var user = _userService.GetByEmail(id);
+                var user = await _userService.GetByEmail(email);
                 if (user == null)
                 {
                     return NotFound();
@@ -64,17 +64,17 @@ namespace UserService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting user with email {email}", id);
+                _logger.LogError(ex, "Error getting user with email {email}", email);
                 return new BadRequestResult();
             }
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] UserDto userDto)
+        public async Task<ActionResult<UserDto>> Create([FromBody] UserDto userDto)
         {
             try
             {
-                var user = _userService.Create(userDto);
+                var user = await _userService.Create(userDto);
                 return Ok(user);
             }
             catch (ArgumentNullException ex)
@@ -90,11 +90,11 @@ namespace UserService.Controllers
         }
 
         [HttpPut]
-        public IActionResult Update([FromBody] UserDto userDto)
+        public async Task<ActionResult<UserDto>> Update([FromBody] UserDto userDto)
         {
             try
             {
-                var user = _userService.Update(userDto);
+                var user = await _userService.Update(userDto);
                 return Ok(user);
             }
             catch (ArgumentNullException ex)
@@ -115,12 +115,12 @@ namespace UserService.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete([FromQuery] Guid id)
+        public async Task<ActionResult> Delete([FromQuery] Guid id)
         {
             try
             {
-                _userService.Delete(id);
-                return Ok();
+                await _userService.Delete(id);
+                return NoContent();
             }
             catch (ArgumentNullException ex)
             {
@@ -140,12 +140,12 @@ namespace UserService.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] UserLoginDto userDto)
+        public async Task<ActionResult<UserDto>> Login([FromBody] UserLoginDto userDto)
         {
             try
             {
-                var user = _userService.Login(userDto);
-                return Ok(user);
+                var token = await _userService.Login(userDto);
+                return Ok(token);
             }
             catch (ArgumentNullException ex)
             {

@@ -1,4 +1,4 @@
-﻿using System.Data.Entity.Core.Mapping;
+﻿
 using AutoMapper;
 using UserService.Models.DAO;
 using UserService.Models.DTO;

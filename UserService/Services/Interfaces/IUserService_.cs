@@ -4,13 +4,13 @@ namespace UserService.Services.Interfaces
 {
     public interface IUserService_
     {
-        public List<UserDto> GetAll();
-        public UserDto GetById(Guid id);
-        public UserDto GetByEmail(string email);
-        public UserDto Create(UserDto userDto);
-        public UserDto Update(UserDto userDto);
-        public void Delete(Guid id);
-        public UserDto Login(UserLoginDto userDto);
+        public Task<List<UserDto>> GetAll();
+        public Task<UserDto> GetById(Guid id);
+        public Task<UserDto> GetByEmail(string email);
+        public Task<UserDto> Create(UserDto userDto);
+        public Task<UserDto> Update(UserDto userDto);
+        public Task Delete(Guid id);
+        public Task<string> Login(UserLoginDto userDto);
 
     }
 }
