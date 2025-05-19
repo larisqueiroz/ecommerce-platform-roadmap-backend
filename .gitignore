@@ -2,3 +2,5 @@
 UserService/bin
 UserService/.idea
 UserService/.vs
+UserService.Tests/bin
+UserService.Tests/obj
