@@ -85,8 +85,8 @@ namespace UserService.Services.Implementations
             {
                 Id = saved.Id,
                 Name = userDto.Name,
-                Email = userDto.Email,
-                Type = userDto.Type
+                Type = userDto.Type,
+                UpdatedAt = DateTime.Now
             };
 
             return _mapper.Map<UserDto>(await _userRepository.Update(user));

@@ -7,7 +7,7 @@ namespace UserService.Controllers
 {
     [ApiController]
     [Authorize("Users")]
-    [Route("api/users")]
+    [Route("/scalar/v1/users")]
     public class UserController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
