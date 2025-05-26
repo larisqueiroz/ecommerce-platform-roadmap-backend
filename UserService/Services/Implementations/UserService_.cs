@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Xml.Linq;
 using UserService.Models.DAO;
 using UserService.Models.DTO;
 using UserService.Repositories.Interfaces;
@@ -81,15 +82,12 @@ namespace UserService.Services.Implementations
                 throw new ArgumentException("User not found");
             }
 
-            User user = new User
-            {
-                Id = saved.Id,
-                Name = userDto.Name,
-                Type = userDto.Type,
-                UpdatedAt = DateTime.Now
-            };
+            saved.Id = saved.Id;
+            saved.Name = userDto.Name;
+            saved.Type = userDto.Type;
+            saved.UpdatedAt = DateTime.Now;
 
-            return _mapper.Map<UserDto>(await _userRepository.Update(user));
+            return _mapper.Map<UserDto>(await _userRepository.Update(_mapper.Map<User>(saved)));
         }
 
         public async Task Delete(Guid id)

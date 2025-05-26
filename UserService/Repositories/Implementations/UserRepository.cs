@@ -14,17 +14,17 @@ namespace UserService.Repositories.Implementations
 
         public async Task<List<User>> GetAll()
         {
-            return await _context.Users.AsNoTracking().ToListAsync();
+            return await _context.Users.AsNoTracking().Where(u => u.Active).ToListAsync();
         }
 
         public async Task<User> GetById(Guid id)
         {
-            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id && u.Active);
         }
 
         public async Task<User> GetByEmail(string email)
         {
-            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
+            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email && u.Active);
         }
 
         public async Task<User> Create(User user)

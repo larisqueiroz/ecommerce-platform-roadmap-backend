@@ -30,16 +30,16 @@ namespace UserService.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting all users");
-                return new BadRequestResult();
+                return BadRequest(ex.Message);
             }
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("by-id")]
         public async Task<ActionResult<UserDto>> GetById([FromQuery] Guid id)
         {
             try
             {
-                var user = await _userService.GetById(id);
+                UserDto user = await _userService.GetById(id);
                 if (user == null)
                 {
                     return NotFound();
@@ -49,11 +49,11 @@ namespace UserService.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting user with id {id}", id);
-                return new BadRequestResult();
+                return BadRequest(ex.Message);
             }
         }
 
-        [HttpGet("by-email/{email}")]
+        [HttpGet("by-email")]
         public async Task<ActionResult<UserDto>> GetByEmail([FromQuery] string email)
         {
             try
@@ -68,7 +68,7 @@ namespace UserService.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting user with email {email}", email);
-                return new BadRequestResult();
+                return BadRequest(ex.Message);
             }
         }
 
@@ -81,15 +81,10 @@ namespace UserService.Controllers
                 var user = await _userService.Create(userDto);
                 return Ok(user);
             }
-            catch (ArgumentNullException ex)
-            {
-                _logger.LogError(ex, "Error creating user");
-                return BadRequest(ex.Message);
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating user");
-                return new BadRequestResult();
+                return BadRequest(ex.Message);
             }
         }
 
@@ -101,24 +96,14 @@ namespace UserService.Controllers
                 var user = await _userService.Update(userDto);
                 return Ok(user);
             }
-            catch (ArgumentNullException ex)
-            {
-                _logger.LogError(ex, "Error updating user");
-                return BadRequest(ex.Message);
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError(ex, "Error updating user");
-                return BadRequest(ex.Message);
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating user");
-                return new BadRequestResult();
+                return BadRequest(ex.Message);
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete]
         public async Task<ActionResult> Delete([FromQuery] Guid id)
         {
             try
@@ -126,20 +111,10 @@ namespace UserService.Controllers
                 await _userService.Delete(id);
                 return NoContent();
             }
-            catch (ArgumentNullException ex)
-            {
-                _logger.LogError(ex, "Error deleting user");
-                return BadRequest(ex.Message);
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError(ex, "Error deleting user");
-                return BadRequest(ex.Message);
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting user");
-                return new BadRequestResult();
+                return BadRequest(ex.Message);
             }
         }
 
