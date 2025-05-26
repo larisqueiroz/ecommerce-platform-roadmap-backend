@@ -15,12 +15,12 @@ namespace UserService.Repositories.Implementations
         
         public async Task<List<Address>> GetByUser(Guid id)
         {
-            return await _context.Addresses.Where(a => a.UserId == id).ToListAsync();
+            return await _context.Addresses.Where(a => a.UserId == id && a.Active).ToListAsync();
         }
 
         public async Task<Address> GetById(Guid id)
         {
-            return await _context.Addresses.FirstOrDefaultAsync(a => a.Id == id);
+            return await _context.Addresses.FirstOrDefaultAsync(a => a.Id == id && a.Active);
         }
 
         public async Task<Address> Create(Address address)

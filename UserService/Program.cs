@@ -69,6 +69,8 @@ builder.Services.AddAutoMapper(typeof(MappingProfiles));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService_, UserService_>();
+builder.Services.AddScoped<IAddressRepository, AddressRepository>();
+builder.Services.AddScoped<IAddressService, AddressService>();
 
 var app = builder.Build();
 

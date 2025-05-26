@@ -16,8 +16,8 @@ namespace UserService.Controllers
             _addressService = addressService;
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        [HttpGet("by-id")]
+        public async Task<IActionResult> GetById([FromQuery] Guid id)
         {
             try
             {
@@ -30,12 +30,12 @@ namespace UserService.Controllers
             }
         }
 
-        [HttpGet("by-user")]
-        public async Task<IActionResult> GetByUser(Guid id)
+        [HttpGet("by-userid")]
+        public async Task<ActionResult<List<AddressDto>>> GetAllByUser([FromQuery] Guid id)
         {
             try
             {
-                var addresses = await _addressService.GetByUser(id);
+                List<AddressDto> addresses = await _addressService.GetByUser(id);
                 return Ok(addresses);
             }
             catch (Exception ex)
@@ -72,8 +72,8 @@ namespace UserService.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        [HttpDelete]
+        public async Task<IActionResult> Delete([FromQuery] Guid id)
         {
             try
             {

@@ -11,18 +11,18 @@ using UserService.Tests.Utils;
 
 namespace UserService.Tests
 {
-    public class UserServiceTests: IClassFixture<IntegrationTestWebAppFactory>
+    public class UserControllerTests: IClassFixture<IntegrationTestWebAppFactory>
     {
 
         private readonly LoginHelper _loginHelper;
-        public UserServiceTests(IntegrationTestWebAppFactory factory)
+        public UserControllerTests(IntegrationTestWebAppFactory factory)
         {
             _loginHelper = new LoginHelper(factory);
         }
 
 
         [Fact]
-        public async Task CreateMeter_ShouldCreateProduct()
+        public async Task CreateMeter_ShouldReturnUser()
         {
             var user = new UserDto()
             {
