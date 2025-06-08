@@ -4,3 +4,5 @@ UserService/.idea
 UserService/.vs
 UserService.Tests/bin
 UserService.Tests/obj
+CatalogService/obj
+CatalogService/.vs
